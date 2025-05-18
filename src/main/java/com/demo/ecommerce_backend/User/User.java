@@ -83,7 +83,7 @@ public class User implements UserDetails {
 
     @Override
     public String getUsername() {
-        return this.email;  // Concatenate first and last name (e.g., John Doe)
+        return this.phoneNo;  // Concatenate first and last name (e.g., John Doe)
     }
 
     @Override

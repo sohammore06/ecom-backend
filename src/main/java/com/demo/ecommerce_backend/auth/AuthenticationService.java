@@ -3,6 +3,8 @@ package com.demo.ecommerce_backend.auth;
 import com.demo.ecommerce_backend.User.UserReposirtory;
 import com.demo.ecommerce_backend.config.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -11,13 +13,13 @@ import com.demo.ecommerce_backend.User.User;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     private final UserReposirtory repository;
 //    private final TokenRepository tokenRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
-        System.out.println("Your value: " + request.getEmail());
-        System.out.println("Your value: " + request.getPhoneNo());
+        log.info("authenticating for request");
         final String identifier = (request.getEmail() != null) ? request.getEmail() : request.getPhoneNo();
         System.out.println("Attempting authentication with identifier: " + identifier);
 
@@ -30,6 +32,7 @@ public class AuthenticationService {
                     )
             );
         } catch (Exception e) {
+            log.error("authentication failed:"+ e.getMessage());
             throw new RuntimeException("Authentication failed: " + e.getMessage());
         }
         var user = repository.findByEmail(identifier)

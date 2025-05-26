@@ -4,6 +4,7 @@ package com.demo.ecommerce_backend.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -16,6 +17,7 @@ import java.util.List;
 
 @Entity
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "users") // Table name in the database
@@ -31,7 +33,7 @@ public class User implements UserDetails {
     @Column(name = "last_name", length = 255)
     private String lastName;
 
-    @Column(name = "phone_no", length = 20)
+    @Column(name = "phone_no", length = 20,unique = true)
     private String phoneNo;
 
     @Column(name = "email", length = 255)

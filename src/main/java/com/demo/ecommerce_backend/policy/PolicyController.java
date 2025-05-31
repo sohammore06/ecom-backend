@@ -1,5 +1,6 @@
 package com.demo.ecommerce_backend.policy;
 
+import com.demo.ecommerce_backend.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,37 +14,35 @@ public class PolicyController {
     private final PolicyService policyService;
 
     @PostMapping
-    public ResponseEntity<PolicyResponseDto> addPolicy(@RequestBody PolicyRequestDto dto) {
+    public ResponseEntity<ApiResponse<PolicyResponseDto>> addPolicy(@RequestBody PolicyRequestDto dto) {
         PolicyResponseDto savedPolicy = policyService.addPolicy(dto);
-        return ResponseEntity.ok(savedPolicy);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Policy created successfully", savedPolicy));
     }
 
-    // Edit existing policy by id
     @PutMapping("/{id}")
-    public ResponseEntity<PolicyResponseDto> editPolicy(
+    public ResponseEntity<ApiResponse<PolicyResponseDto>> editPolicy(
             @PathVariable Integer id,
             @RequestBody PolicyRequestDto dto) {
         PolicyResponseDto updatedPolicy = policyService.editPolicy(id, dto);
-        return ResponseEntity.ok(updatedPolicy);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Policy updated successfully", updatedPolicy));
     }
 
-    // Delete policy by id
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePolicy(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse<Void>> deletePolicy(@PathVariable Integer id) {
         policyService.deletePolicy(id);
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(new ApiResponse<>(true, "Policy deleted successfully", null));
     }
 
-    //  Get all policies
     @GetMapping
-    public ResponseEntity<List<PolicyResponseDto>> getAllPolicies() {
+    public ResponseEntity<ApiResponse<List<PolicyResponseDto>>> getAllPolicies() {
         List<PolicyResponseDto> policies = policyService.getAllPolicies();
-        return ResponseEntity.ok(policies);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Fetched all policies", policies));
     }
 
     @GetMapping("/{type}")
-    public ResponseEntity<PolicyResponseDto> getPolicyByType(@PathVariable String type) {
-        return ResponseEntity.ok(policyService.getPolicyWithSections(type));
+    public ResponseEntity<ApiResponse<PolicyResponseDto>> getPolicyByType(@PathVariable String type) {
+        PolicyResponseDto policy = policyService.getPolicyWithSections(type);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Fetched policy for type: " + type, policy));
     }
 
 }

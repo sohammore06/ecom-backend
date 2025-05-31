@@ -1,6 +1,6 @@
 package com.demo.ecommerce_backend.exception;
 
-public class CustomException {
+public class CustomJwtAuthenticationException extends RuntimeException {
     public CustomJwtAuthenticationException(String message, Throwable cause) {
         super(message, cause);
     }

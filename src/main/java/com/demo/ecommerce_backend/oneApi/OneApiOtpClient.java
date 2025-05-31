@@ -1,7 +1,9 @@
-package com.demo.ecommerce_backend.thirdparty;
-import com.demo.ecommerce_backend.config.OneApiProperties;
+package com.demo.ecommerce_backend.oneApi;
+import com.demo.ecommerce_backend.oneApi.OneApiOtpProperties;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
@@ -10,8 +12,9 @@ import org.springframework.web.client.RestTemplate;
 @RequiredArgsConstructor
 @Slf4j
 public class OneApiOtpClient {
+    private static final Logger log = LoggerFactory.getLogger(OneApiOtpClient.class);
     private final RestTemplate restTemplate = new RestTemplate();
-    private final OneApiProperties oneApiProperties;
+    private final OneApiOtpProperties oneApiProperties;
 
     private static final String API_URL = "https://backend.oneapi.in/sms/sendotp";
 
@@ -25,7 +28,7 @@ public class OneApiOtpClient {
                 "otp": %s
             }
         """, oneApiProperties.getApiKey(), oneApiProperties.getBrandName(), customerName, phoneNumber, otp);
-
+        log.info("calling api for sending otp"+json);
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         HttpEntity<String> request = new HttpEntity<>(json, headers);

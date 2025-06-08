@@ -4,6 +4,8 @@ import com.demo.ecommerce_backend.category.Category;
 import com.demo.ecommerce_backend.category.CategoryRepository;
 import com.demo.ecommerce_backend.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,7 +44,8 @@ public class ProductService {
         return mapToResponse(getProductEntityById(id));
     }
 
-    public List<ProductResponse> getAllProducts() {
+    public List<ProductResponse> getAllProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
         return productRepository.findAll().stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());

@@ -33,8 +33,10 @@ public class ProductController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts( @RequestParam(defaultValue = "0") int page,
-                                                                              @RequestParam(defaultValue = "10") int size) {
-        List<ProductResponse> products = productService.getAllProducts(page, size);
+                                                                              @RequestParam(defaultValue = "10") int size,
+                                                                              @RequestParam(required = false) Boolean active,
+                                                                              @RequestParam(required = false) Boolean instantDelivery) {
+        List<ProductResponse> products = productService.getAllProducts(page, size,active,instantDelivery);
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Products fetched successfully", products)
         );

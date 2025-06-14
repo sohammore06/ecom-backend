@@ -18,4 +18,5 @@ public class ProductRequest {
     private BigDecimal price;
     private BigDecimal discountedPrice;
     private boolean isActive;
+    private boolean instantDelivery;
 }

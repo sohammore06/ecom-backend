@@ -67,6 +67,7 @@ public class AuthenticationService {
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(request.getRole())
+                .active(true)
                 .phoneNo(request.getPhoneNo())
                 .build();
         if (repository.existsByPhoneNo(request.getPhoneNo())) {

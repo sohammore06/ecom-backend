@@ -51,11 +51,11 @@ public class User implements UserDetails {
     @Column(name = "address", columnDefinition = "TEXT")
     private String address;
 
-    @Column(name = "date_of_birth")
-    private LocalDate dateOfBirth;
+//    @Column(name = "date_of_birth")
+//    private LocalDate dateOfBirth;
 
-//    @Column(name = "active")
-//    private Boolean active;
+    @Column(name = "active")
+    private Boolean active;
 
     @Column(name = "last_login")
     private LocalDateTime lastLogin;

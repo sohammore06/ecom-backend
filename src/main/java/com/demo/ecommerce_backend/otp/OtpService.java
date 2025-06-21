@@ -1,4 +1,5 @@
 package com.demo.ecommerce_backend.otp;
+import com.demo.ecommerce_backend.User.UserReposirtory;
 import com.demo.ecommerce_backend.oneApi.OneApiOtpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -15,21 +16,28 @@ public class OtpService{
     private final OneApiOtpClient oneApiOtpClient;
     private final StringRedisTemplate redisTemplate;
     private final RestTemplate restTemplate = new RestTemplate();
+    private final UserReposirtory userRepository;
     private static final Logger log = LoggerFactory.getLogger(OneApiOtpClient.class);
-    public boolean sendOtp(OtpRequest request) {
+    public OtpResponse sendOtp(OtpRequest request) {
+        boolean userExists = userRepository.existsByPhoneNo(request.getNumber());
+
+        if (!userExists) {
+            log.warn("User with phone number {} does not exist", request.getNumber());
+            return new OtpResponse(false, "User with this phone number does not exist.");
+        }
+
         String otp = generateOtp();
         boolean sent = oneApiOtpClient.sendOtp(request.getCustomerName(), request.getNumber(), otp);
 
-
         if (sent) {
-            log.info("here is your sent--->"+sent);
             String key = buildOtpKey(request.getNumber());
-            log.info("setting key"+key);
-            redisTemplate.opsForValue().set(key, otp, Duration.ofMinutes(5)); // TTL of 5 minutes
+            redisTemplate.opsForValue().set(key, otp, Duration.ofMinutes(5));
+            return new OtpResponse(true, "OTP sent successfully.");
+        } else {
+            return new OtpResponse(false, "Failed to send OTP. Please try again.");
         }
-
-        return sent;
     }
+
     public boolean verifyOtp(String phoneNumber, String otp) {
         String key = "OTP_" + phoneNumber;
         String cachedOtp = redisTemplate.opsForValue().get(key);

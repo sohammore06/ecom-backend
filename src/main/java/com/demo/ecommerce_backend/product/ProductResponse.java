@@ -20,6 +20,7 @@ public class ProductResponse {
     private BigDecimal price;
     private BigDecimal discountedPrice;
     private boolean isActive;
+    private boolean instantDelivery;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

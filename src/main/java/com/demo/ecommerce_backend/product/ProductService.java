@@ -35,6 +35,7 @@ public class ProductService {
                 .price(request.getPrice())
                 .discountedPrice(request.getDiscountedPrice())
                 .isActive(request.isActive())
+                .instantDelivery(request.isInstantDelivery())
                 .build();
 
         return mapToResponse(productRepository.save(product));
@@ -44,9 +45,20 @@ public class ProductService {
         return mapToResponse(getProductEntityById(id));
     }
 
-    public List<ProductResponse> getAllProducts(int page, int size) {
+    public List<ProductResponse> getAllProducts(int page, int size,Boolean active, Boolean instantDelivery) {
         Pageable pageable = PageRequest.of(page, size);
-        return productRepository.findAll().stream()
+        List<Product> products;
+
+        if (active != null && instantDelivery != null) {
+            products = productRepository.findByIsActiveAndInstantDelivery(active, instantDelivery, pageable);
+        } else if (active != null) {
+            products = productRepository.findByIsActive(active, pageable);
+        } else if (instantDelivery != null) {
+            products = productRepository.findByInstantDelivery(instantDelivery, pageable);
+        } else {
+            products = productRepository.findAll(pageable).getContent();
+        }
+        return products.stream()
                 .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
@@ -97,6 +109,7 @@ public class ProductService {
                 .price(product.getPrice())
                 .discountedPrice(product.getDiscountedPrice())
                 .isActive(product.isActive())
+                .instantDelivery(product.isInstantDelivery())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();

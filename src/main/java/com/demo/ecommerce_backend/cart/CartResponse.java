@@ -3,6 +3,7 @@ package com.demo.ecommerce_backend.cart;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -17,4 +18,6 @@ public class CartResponse {
     private BigDecimal discountedPrice;
     private int quantity;
     private BigDecimal subtotal;
+    private String imageUrl;
+    private Map<String, String> metadata;
 }

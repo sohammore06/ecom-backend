@@ -37,6 +37,8 @@ public class CartService {
                         .user(user)
                         .product(product)
                         .quantity(request.getQuantity())
+                        .imageUrl(request.getImageUrl())
+                        .metadata(request.getMetadata())
                         .build());
 
         return mapToResponse(cartItemRepository.save(cartItem));
@@ -80,6 +82,8 @@ public class CartService {
                 .price(item.getProduct().getPrice())
                 .discountedPrice(item.getProduct().getDiscountedPrice())
                 .quantity(item.getQuantity())
+                .imageUrl(item.getProduct().getImageUrl())
+                .metadata(item.getMetadata())
                 .build();
     }
 }

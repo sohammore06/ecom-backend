@@ -1,9 +1,14 @@
 package com.demo.ecommerce_backend.auth;
 
 import com.demo.ecommerce_backend.User.UserReposirtory;
+import com.demo.ecommerce_backend.User.UserResponse;
 import com.demo.ecommerce_backend.config.JwtService;
 import com.demo.ecommerce_backend.token.TokenRepository;
 import com.demo.ecommerce_backend.token.TokenType;
+import com.demo.ecommerce_backend.util.ApiResponse;
+import com.demo.ecommerce_backend.wallet.Wallet;
+import com.demo.ecommerce_backend.wallet.WalletRepository;
+import com.demo.ecommerce_backend.wallet.WalletResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,6 +24,7 @@ import com.demo.ecommerce_backend.User.User;
 import com.demo.ecommerce_backend.token.Token;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -26,9 +32,10 @@ public class AuthenticationService {
     private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     private final UserReposirtory repository;
     private final TokenRepository tokenRepository;
+    private final WalletRepository walletRepository;
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
-    public AuthenticationResponse authenticate(AuthenticationRequest request) {
+    public ApiResponse<AuthenticationResponse>  authenticate(AuthenticationRequest request) {
         log.info("authenticating for request");
         final String identifier = (request.getEmail() != null) ? request.getEmail() : request.getPhoneNo();
         System.out.println("Attempting authentication with identifier: " + identifier);
@@ -52,10 +59,34 @@ public class AuthenticationService {
         var refreshToken = jwtService.generateRefreshToken(user);
         revokeAllUserTokens(user);
         saveUserToken(user, jwtToken);
-        return AuthenticationResponse.builder()
+        UserResponse userResponse = UserResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNo(user.getPhoneNo())
+                .role(user.getRole())
+                .address(user.getAddress())
+                .active(user.getActive())
+                .build();
+        Wallet wallet = walletRepository.findByUser(user)
+                .orElseGet(() -> walletRepository.save(Wallet.builder()
+                        .user(user)
+                        .balance(BigDecimal.ZERO)
+                        .build()));
+
+        WalletResponse walletResponse = WalletResponse.builder()
+                .walletId(wallet.getId())
+                .balance(wallet.getBalance())
+                .build();
+        BigDecimal walletBalance = wallet.getBalance();
+        AuthenticationResponse loginResponse = AuthenticationResponse.builder()
                 .accessToken(jwtToken)
                 .refreshToken(refreshToken)
+                .user(userResponse)
+                .walletBalance(walletBalance)
                 .build();
+        return new ApiResponse<>(true, "Login successful", loginResponse);
     }
 
     private final AuthenticationManager authenticationManager;

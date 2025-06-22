@@ -2,8 +2,11 @@ package com.demo.ecommerce_backend.cart;
 
 import com.demo.ecommerce_backend.product.Product;
 import com.demo.ecommerce_backend.User.User;
+import com.demo.ecommerce_backend.util.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Map;
 
 @Entity
 @Table(name = "cart_items")
@@ -28,4 +31,11 @@ public class CartItem {
 
     @Column(nullable = false)
     private int quantity;
+    @Column(length = 1000)
+    private String imageUrl;
+
+    @Convert(converter = JsonMapConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private Map<String, String> metadata;
+
 }

@@ -27,6 +27,7 @@ public class UserService {
                 .password(request.getPassword())
                 .role(request.getRole())
                 .address(request.getAddress())
+                .active(true)
                 .createdAt(LocalDate.now())
                 .updatedAt(LocalDate.now())
                 .build();
@@ -57,6 +58,7 @@ public class UserService {
         user.setEmail(request.getEmail());
         user.setPassword(request.getPassword());
         user.setRole(request.getRole());
+        user.setActive(request.getActive());
         user.setAddress(request.getAddress());
         user.setUpdatedAt(LocalDate.now());
 
@@ -78,6 +80,7 @@ public class UserService {
                 .email(user.getEmail())
                 .role(user.getRole())
                 .address(user.getAddress())
+                .active(user.getActive())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
                 .lastLogin(user.getLastLogin())

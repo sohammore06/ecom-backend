@@ -30,6 +30,8 @@ public class Category {
 
     private boolean isActive = true;
 
+    @Column(length = 1000)
+    private String imageUrl;
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime updatedAt = LocalDateTime.now();

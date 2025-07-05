@@ -153,6 +153,8 @@ public class PaymentService {
                 .paymentUrl(paymentUrl)
                 .amount(request.getAmount())
                 .status(status)
+                .paymentType(request.getPaymentType())
+                .paymentMode(PaymentMode.UPI)
                 .build();
 
         return new ApiResponse<>(true, "Payment initiated with Mobalegends", paymentResponse);
@@ -209,9 +211,11 @@ public class PaymentService {
                 .paymentUrl(paymentUrl)
                 .amount(request.getAmount())
                 .status(status)
+                .paymentType(request.getPaymentType())
+                .paymentMode(PaymentMode.UPI)
                 .build();
 
         return new ApiResponse<>(true, "Payment initiated with Mobalegends", paymentResponse);
     }
-
+    
 }

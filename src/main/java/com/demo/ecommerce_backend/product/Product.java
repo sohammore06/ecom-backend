@@ -1,11 +1,13 @@
 package com.demo.ecommerce_backend.product;
 
 import com.demo.ecommerce_backend.category.Category;
+import com.demo.ecommerce_backend.util.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Entity
 @Table(name = "products")
@@ -55,4 +57,16 @@ public class Product {
     public void setUpdatedAt() {
         this.updatedAt = LocalDateTime.now();
     }
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ProductSource source;
+
+    private String externalProductId;
+    private String externalCategoryId;
+    private boolean requiresUserGameId;
+    private boolean requiresServerId;
+    @Convert(converter = JsonMapConverter.class)
+    @Column(columnDefinition = "TEXT")
+    private Map<String, String> metadata;
+
 }

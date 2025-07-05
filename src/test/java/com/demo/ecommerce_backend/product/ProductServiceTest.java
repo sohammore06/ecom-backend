@@ -6,6 +6,9 @@ import com.demo.ecommerce_backend.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -60,14 +63,17 @@ class ProductServiceTest {
     @Test
     void testGetAllProducts() {
         List<Product> products = List.of(getSampleProduct(), getSampleProduct());
-        when(productRepository.findAll()).thenReturn(products);
+        Page<Product> page = new PageImpl<>(products); // Wrap in PageImpl
 
-        List<ProductResponse> responses = productService.getAllProducts(0,10);
+        when(productRepository.findAll(any(Pageable.class))).thenReturn(page);
+
+        List<ProductResponse> responses = productService.getAllProducts(0, 10, null, null);
 
         assertEquals(2, responses.size());
         assertEquals("Sample", responses.get(0).getName());
         assertEquals("SAMPLE_CODE", responses.get(0).getCode());
     }
+
 
 
     @Test

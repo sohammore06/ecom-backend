@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import com.demo.ecommerce_backend.orderItem.OrderItemRepository;
 import java.math.BigDecimal;
@@ -64,7 +65,7 @@ public class OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Order> ordersPage = orderRepository.findByUser(user, pageable);
 
         List<OrderResponse> response = ordersPage.getContent().stream().map(order -> {
@@ -90,7 +91,7 @@ public class OrderService {
         return new ApiResponse<>(true, "User orders fetched (page " + page + ")", response);
     }
     public ApiResponse<List<OrderResponse>> getAllOrders(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
         Page<Order> ordersPage = orderRepository.findAll(pageable);
 
         List<OrderResponse> response = ordersPage.getContent().stream().map(order -> {

@@ -1,8 +1,12 @@
 package com.demo.ecommerce_backend.category;
+import com.demo.ecommerce_backend.auth.AuthenticationService;
 import com.demo.ecommerce_backend.category.CategoryResponse;
 import com.demo.ecommerce_backend.category.CategoryRequest;
 import com.demo.ecommerce_backend.exception.ResourceNotFoundException;
+import com.demo.ecommerce_backend.util.FileUploadUtil;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -11,9 +15,9 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class CategoryService {
-
+    private static final Logger log = LoggerFactory.getLogger(AuthenticationService.class);
     private final CategoryRepository categoryRepository;
-
+    private final FileUploadUtil fileUploadUtil;
     public CategoryResponse createCategory(CategoryRequest request) {
         Category category = new Category();
         category.setName(request.getName());
@@ -23,7 +27,14 @@ public class CategoryService {
                     .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
             category.setParent(parent);
         }
-
+        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+            try {
+                String imageUrl = fileUploadUtil.saveImage(request.getImageFile(), "categories");
+                category.setImageUrl(imageUrl);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to upload category image", e);
+            }
+        }
         Category saved = categoryRepository.save(category);
         return mapToResponse(saved);
     }
@@ -56,7 +67,15 @@ public class CategoryService {
         } else {
             category.setParent(null); // remove parent if null
         }
-
+        if (request.getImageFile() != null && !request.getImageFile().isEmpty()) {
+            try {
+                log.info("Updating category image");
+                String imageUrl = fileUploadUtil.saveImage(request.getImageFile(), "categories");
+                category.setImageUrl(imageUrl);
+            } catch (Exception e) {
+                throw new RuntimeException("Failed to upload category image", e);
+            }
+        }
         Category updated = categoryRepository.save(category);
         return mapToResponse(updated);
     }
@@ -79,6 +98,7 @@ public class CategoryService {
                 .isActive(category.isActive())
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
+                .imageUrl(category.getImageUrl()) // ➕ include in CategoryResponse if not already
                 .build();
     }
 }

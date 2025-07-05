@@ -2,6 +2,7 @@ package com.demo.ecommerce_backend.category;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Getter
 @Setter
@@ -14,4 +15,5 @@ public class CategoryRequest {
     private String name;
     private Integer parentId; // null if it's a top-level category
     private boolean isActive = true;
+    private MultipartFile imageFile;
 }

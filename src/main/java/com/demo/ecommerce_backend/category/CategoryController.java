@@ -18,11 +18,10 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping
-    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(@Valid @RequestBody CategoryRequest request) {
+    public ResponseEntity<ApiResponse<CategoryResponse>> createCategory(
+            @ModelAttribute @Valid CategoryRequest request) {
         CategoryResponse response = categoryService.createCategory(request);
-        return ResponseEntity.ok(
-                new ApiResponse<>(true, "Category created successfully", response)
-        );
+        return ResponseEntity.ok(new ApiResponse<>(true, "Category created successfully", response));
     }
 
     @GetMapping
@@ -44,11 +43,9 @@ public class CategoryController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<CategoryResponse>> updateCategory(
             @PathVariable Integer id,
-            @Valid  @RequestBody CategoryRequest request) {
+            @ModelAttribute @Valid CategoryRequest request) {
         CategoryResponse response = categoryService.updateCategory(id, request);
-        return ResponseEntity.ok(
-                new ApiResponse<>(true, "Category updated successfully", response)
-        );
+        return ResponseEntity.ok(new ApiResponse<>(true, "Category updated successfully", response));
     }
 
     @DeleteMapping("/{id}")

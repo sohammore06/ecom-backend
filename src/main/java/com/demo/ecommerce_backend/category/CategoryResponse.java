@@ -17,5 +17,6 @@ public class CategoryResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Integer parentId;
+    private String imageUrl;
     private List<CategoryResponse> subcategories;
 }

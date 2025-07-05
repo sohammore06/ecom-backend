@@ -36,6 +36,12 @@ public class ProductService {
                 .discountedPrice(request.getDiscountedPrice())
                 .isActive(request.isActive())
                 .instantDelivery(request.isInstantDelivery())
+                .source(request.getSource())
+                .externalProductId(request.getExternalProductId())
+                .externalCategoryId(request.getExternalCategoryId())
+                .requiresUserGameId(request.isRequiresUserGameId())
+                .requiresServerId(request.isRequiresServerId())
+                .metadata(request.getMetadata())
                 .build();
 
         return mapToResponse(productRepository.save(product));
@@ -72,6 +78,12 @@ public class ProductService {
         product.setPrice(request.getPrice());
         product.setDiscountedPrice(request.getDiscountedPrice());
         product.setActive(request.isActive());
+        product.setSource(request.getSource());
+        product.setExternalProductId(request.getExternalProductId());
+        product.setExternalCategoryId(request.getExternalCategoryId());
+        product.setRequiresUserGameId(request.isRequiresUserGameId());
+        product.setRequiresServerId(request.isRequiresServerId());
+        product.setMetadata(request.getMetadata());
         if (productRepository.existsByCodeAndIdNot(request.getCode(), id)) {
             throw new IllegalArgumentException("Product code already exists.");
         }
@@ -110,6 +122,12 @@ public class ProductService {
                 .discountedPrice(product.getDiscountedPrice())
                 .isActive(product.isActive())
                 .instantDelivery(product.isInstantDelivery())
+                .source(product.getSource())
+                .externalProductId(product.getExternalProductId())
+                .externalCategoryId(product.getExternalCategoryId())
+                .requiresUserGameId(product.isRequiresUserGameId())
+                .requiresServerId(product.isRequiresServerId())
+                .metadata(product.getMetadata())
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();

@@ -4,6 +4,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -23,4 +24,10 @@ public class ProductResponse {
     private boolean instantDelivery;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private ProductSource source;
+    private String externalProductId;
+    private String externalCategoryId;
+    private boolean requiresUserGameId;
+    private boolean requiresServerId;
+    private Map<String, String> metadata;
 }

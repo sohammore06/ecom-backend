@@ -1,4 +1,5 @@
 package com.demo.ecommerce_backend.otp;
+import com.demo.ecommerce_backend.auth.AuthenticationResponse;
 import com.demo.ecommerce_backend.oneApi.OneApiOtpClient;
 import com.demo.ecommerce_backend.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,4 +38,16 @@ public class OtpController {
                     .body(new ApiResponse<>(false, "Invalid OTP", null));
         }
     }
+    @PostMapping("/login")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> loginViaOtp(@RequestBody VerifyOtpRequest request) {
+        try {
+            AuthenticationResponse response = otpService.loginViaOtp(request);
+            return ResponseEntity.ok(new ApiResponse<>(true, "Login successful", response));
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        }
+    }
+
 }

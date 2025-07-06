@@ -5,4 +5,5 @@ import lombok.Data;
 public class OtpRequest {
     private String number;
     private String customerName;
+    private String flow;
 }

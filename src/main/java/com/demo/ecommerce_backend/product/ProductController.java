@@ -15,7 +15,7 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @PostMapping(value = "", consumes = "multipart/form-data")
+    @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request) {
         ProductResponse response = productService.createProduct(request);
         return ResponseEntity.ok(

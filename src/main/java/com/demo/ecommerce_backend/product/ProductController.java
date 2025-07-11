@@ -33,7 +33,7 @@ public class ProductController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts( @RequestParam(defaultValue = "0") int page,
+    public ResponseEntity<ApiResponse<List<ProductResponse>>> getAllProducts( @RequestParam(defaultValue = "1") int page,
                                                                               @RequestParam(defaultValue = "10") int size,
                                                                               @RequestParam(required = false) Boolean active,
                                                                               @RequestParam(required = false) Boolean instantDelivery) {

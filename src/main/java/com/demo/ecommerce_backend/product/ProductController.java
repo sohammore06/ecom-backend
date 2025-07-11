@@ -1,5 +1,6 @@
 package com.demo.ecommerce_backend.product;
 
+import com.demo.ecommerce_backend.schedule.ThirdPartySyncService;
 import com.demo.ecommerce_backend.util.ApiResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
-
+    private final ThirdPartySyncService thirdPartySyncService;
     @PostMapping
     public ResponseEntity<ApiResponse<ProductResponse>> createProduct(@Valid @RequestBody ProductRequest request) {
         ProductResponse response = productService.createProduct(request);
@@ -58,5 +59,11 @@ public class ProductController {
         return ResponseEntity.ok(
                 new ApiResponse<>(true, "Product deleted successfully", null)
         );
+    }
+    @PostMapping("/sync")
+    public ApiResponse<String> syncProductsManually() {
+        System.out.println("➡️ Product sync endpoint hit");
+        thirdPartySyncService.runSync();
+        return new ApiResponse<>(true, "Product sync started manually.");
     }
 }

@@ -23,7 +23,7 @@ public class OrderController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getAllOrders(
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(orderService.getAllOrders(page, size));
@@ -32,7 +32,7 @@ public class OrderController {
     @GetMapping("/user/{userId}")
     public ResponseEntity<ApiResponse<List<OrderResponse>>> getOrdersByUser(
             @PathVariable Integer userId,
-            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "1") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
         return ResponseEntity.ok(orderService.getOrdersByUser(userId, page, size));

@@ -1,7 +1,8 @@
 package com.demo.ecommerce_backend.smileone;
 
+import lombok.Builder;
 import lombok.Data;
-
+@Builder
 @Data
 public class SmileOneOrderRequest {
     private String userId;       // entered by user

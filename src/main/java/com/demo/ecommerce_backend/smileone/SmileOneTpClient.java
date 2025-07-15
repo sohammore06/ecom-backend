@@ -84,7 +84,7 @@ public class SmileOneTpClient {
         }
     }
     @Transactional
-    public String createOrder(SmileOneOrderRequest request) {
+    public SmileOneOrderResponse createOrder(SmileOneOrderRequest request) {
         try {
             ThirdParty config = thirdPartyRepository.findByNameIgnoreCase("smileone")
                     .orElseThrow(() -> new RuntimeException("SmileOne third-party config not found"));
@@ -105,7 +105,7 @@ public class SmileOneTpClient {
             params.put("email", email);
             params.put("userid", request.getUserId());
             params.put("zoneid", request.getZoneId());
-            params.put("product", request.getProductName());
+            params.put("product", "mobilelegends");
             params.put("productid", request.getProductId());
             params.put("time", String.valueOf(timestamp));
 
@@ -120,12 +120,12 @@ public class SmileOneTpClient {
             headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
             HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
-
-            ResponseEntity<String> response = restTemplate.postForEntity(CREATE_ORDER_API_URL, entity, String.class);
-
-            log.info("SmileOne createOrder response: {}", response.getBody());
+            log.info("SmileOne createOrder request: {}", entity);
+            System.out.println(entity);
+            ResponseEntity<SmileOneOrderResponse> response= restTemplate.postForEntity(CREATE_ORDER_API_URL, entity, SmileOneOrderResponse.class);
+            System.out.println("here is your response from smile one for product--->"+response);
+            log.info("SmileOne createOrder response: {}",response);
             return response.getBody();
-
         } catch (Exception e) {
             log.error("Failed to create SmileOne order", e);
             throw new RuntimeException("Failed to create SmileOne order", e);

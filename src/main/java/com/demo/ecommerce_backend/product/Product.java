@@ -68,5 +68,8 @@ public class Product {
     @Convert(converter = JsonMapConverter.class)
     @Column(columnDefinition = "TEXT")
     private Map<String, String> metadata;
-
+    @PrePersist
+    public void setCreatedAt() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

@@ -132,6 +132,8 @@ public class OrderService {
                     .product(product)
                     .quantity(itemReq.getQuantity())
                     .priceAtPurchase(product.getDiscountedPrice())
+                    .gameUserId(itemReq.getGameUserId())   // ✅ this line
+                    .zoneId(itemReq.getZoneId())
                     .delivered(false)
                     .build();
         }).toList();

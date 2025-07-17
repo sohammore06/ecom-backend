@@ -164,4 +164,22 @@ public class AuthenticationService {
             }
         }
     }
+    public void logout(HttpServletRequest request) {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        String token = authHeader.substring(7);
+
+        // Fetch token from DB and mark it revoked
+        Token storedToken = tokenRepository.findByToken(token)
+                .orElse(null);
+
+        if (storedToken != null) {
+            storedToken.setExpired(true);
+            storedToken.setRevoked(true);
+            tokenRepository.save(storedToken);
+        }
+    }
+
 }

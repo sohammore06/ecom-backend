@@ -38,4 +38,11 @@ public class AuthenticationController {
     ) throws IOException {
         service.refreshToken(request, response);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
+        service.logout(request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Logout successful", "You have been logged out."));
+    }
+
 }

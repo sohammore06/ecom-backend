@@ -52,7 +52,8 @@ public class ProductService {
     }
 
     public List<ProductResponse> getAllProducts(int page, int size,Boolean active, Boolean instantDelivery) {
-        Pageable pageable = PageRequest.of(page, size);
+        int safePage = Math.max(0, page - 1);
+        Pageable pageable = PageRequest.of(safePage, size);
         List<Product> products;
 
         if (active != null && instantDelivery != null) {

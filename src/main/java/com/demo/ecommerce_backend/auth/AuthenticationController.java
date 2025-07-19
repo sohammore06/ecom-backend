@@ -31,11 +31,18 @@ public class AuthenticationController {
         return ResponseEntity.ok(service.authenticate(request));
     }
 
-//    @PostMapping("/refresh-token")
-//    public void refreshToken(
-//            HttpServletRequest request,
-//            HttpServletResponse response
-//    ) throws IOException {
-//        service.refreshToken(request, response);
-//    }
+    @PostMapping("/refresh-token")
+    public void refreshToken(
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) throws IOException {
+        service.refreshToken(request, response);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<String>> logout(HttpServletRequest request) {
+        service.logout(request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Logout successful", "You have been logged out."));
+    }
+
 }

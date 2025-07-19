@@ -17,4 +17,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     List<Product> findByInstantDelivery(boolean instantDelivery, Pageable pageable);
     List<Product> findBySource(ProductSource source);
     List<Product> findBySourceAndIsActive(ProductSource source, boolean isActive);
+    Optional<Product> findByExternalProductIdAndSource(String externalProductId, ProductSource source);
+
 }

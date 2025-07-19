@@ -7,4 +7,6 @@ import lombok.Data;
 public class OrderItemRequest {
     private Integer productId;
     private Integer quantity;
+    private String gameUserId; // new
+    private String zoneId;
 }

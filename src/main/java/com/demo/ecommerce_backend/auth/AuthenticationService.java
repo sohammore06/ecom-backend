@@ -142,15 +142,16 @@ public class AuthenticationService {
     ) throws IOException {
         final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
         final String refreshToken;
-        final String userEmail;
+        final String identifier;
         if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
             return;
         }
         refreshToken = authHeader.substring(7);
-        userEmail = jwtService.extractUserName(refreshToken);
-        if (userEmail != null) {
-            var user = this.repository.findByEmail(userEmail)
-                    .orElseThrow();
+        identifier = jwtService.extractUserName(refreshToken);
+        if (identifier != null) {
+            var user = repository.findByEmail(identifier)
+                    .orElseGet(() -> repository.findByPhoneNo(identifier)
+                            .orElseThrow(() -> new RuntimeException("User not found with email/phone number: " + identifier)));
             if (jwtService.isTokenValid(refreshToken, user)) {
                 var accessToken = jwtService.generateToken(user.getUsername());
                 revokeAllUserTokens(user);
@@ -163,4 +164,22 @@ public class AuthenticationService {
             }
         }
     }
+    public void logout(HttpServletRequest request) {
+        final String authHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+        String token = authHeader.substring(7);
+
+        // Fetch token from DB and mark it revoked
+        Token storedToken = tokenRepository.findByToken(token)
+                .orElse(null);
+
+        if (storedToken != null) {
+            storedToken.setExpired(true);
+            storedToken.setRevoked(true);
+            tokenRepository.save(storedToken);
+        }
+    }
+
 }

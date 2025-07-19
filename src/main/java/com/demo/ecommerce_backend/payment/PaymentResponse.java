@@ -14,4 +14,5 @@ public class PaymentResponse {
     private String status;
     private PaymentType paymentType;
     private PaymentMode paymentMode;
+    private Integer userId;
 }

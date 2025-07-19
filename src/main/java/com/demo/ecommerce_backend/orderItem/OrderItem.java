@@ -38,4 +38,13 @@ public class OrderItem {
 
     @Column(columnDefinition = "TEXT")
     private String deliveryMetadata;
+
+    @Column(name = "game_user_id")
+    private String gameUserId;
+
+    @Column(name = "zone_id")
+    private String zoneId;
+
+    private String fulfillmentStatus; // e.g., PENDING, SUCCESS, FAILED
+    private String fulfillmentError;
 }

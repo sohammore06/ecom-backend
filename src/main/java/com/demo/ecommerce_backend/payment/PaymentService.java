@@ -15,11 +15,16 @@ import com.demo.ecommerce_backend.order.OrderStatus;
 import com.demo.ecommerce_backend.util.ApiResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import static com.demo.ecommerce_backend.util.JsonUtil.toJson;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -219,5 +224,44 @@ public class PaymentService {
 
         return new ApiResponse<>(true, "Payment initiated with Mobalegends", paymentResponse);
     }
-    
+    public ApiResponse<List<PaymentResponse>> getAllPayments(int page, int size) {
+        int safePage = Math.max(0, page - 1);
+        Pageable pageable = PageRequest.of(safePage, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Payment> payments = paymentRepository.findAll(pageable);
+
+        // Only take the list of responses
+        List<PaymentResponse> responseList = payments.getContent().stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return new ApiResponse<>(true, "All payments fetched", responseList);
+    }
+
+    public ApiResponse<List<PaymentResponse>> getPaymentsByUserId(Long userId, int page, int size) {
+        int safePage = Math.max(0, page - 1);
+        Pageable pageable = PageRequest.of(safePage, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<Payment> payments = paymentRepository.findByUserId(userId, pageable);
+
+        List<PaymentResponse> responseList = payments.getContent().stream()
+                .map(this::mapToResponse)
+                .toList();
+
+        return new ApiResponse<>(true, "Payments fetched for user ID: " + userId, responseList);
+    }
+
+
+
+
+    private PaymentResponse mapToResponse(Payment payment) {
+        return PaymentResponse.builder()
+                .transactionId(payment.getTransactionId())
+                .amount(payment.getAmount())
+                .status(payment.getStatus())
+                .paymentUrl(payment.getPaymentUrl())
+                .paymentMode(payment.getPaymentMode())
+                .paymentType(payment.getPaymentType())
+                .userId(payment.getUser().getId())
+                .build();
+    }
+
 }

@@ -1,4 +1,5 @@
 package com.demo.ecommerce_backend.schedule;
+import com.demo.ecommerce_backend.moogold.MoogoldSyncService;
 import com.demo.ecommerce_backend.product.ProductSource;
 import com.demo.ecommerce_backend.smileone.SmileOneSyncService;
 import com.demo.ecommerce_backend.thirdparty.ThirdParty;
@@ -16,7 +17,7 @@ import java.util.List;
 public class ThirdPartySyncService {
     private final ThirdPartyRepository thirdPartyRepository;
     private final SmileOneSyncService smileOneSyncService;
-    // private final MooGoldSyncService mooGoldSyncService; // (optional to be added later)
+     private final MoogoldSyncService mooGoldSyncService;
 
     // Scheduled daily at 6 AM
     @Scheduled(cron = "0 0 6 * * *")
@@ -41,7 +42,7 @@ public class ThirdPartySyncService {
 
             switch (source) {
                 case SMILEONE -> smileOneSyncService.syncProducts();
-                // case MOOGOLD -> mooGoldSyncService.syncProducts(thirdParty);
+                 case MOOGOLD -> mooGoldSyncService.syncProducts(thirdParty);
                 default -> log.warn("❌ Unsupported third-party: {}", source);
             }
         }

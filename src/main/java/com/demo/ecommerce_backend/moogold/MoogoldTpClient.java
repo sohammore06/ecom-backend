@@ -23,7 +23,7 @@ public class MoogoldTpClient {
     private final ObjectMapper objectMapper;
     private final ThirdPartyRepository thirdPartyRepository;
 
-    private static final String GET_PRODUCTS_URL = "https://moogold.com/wp-json/v1/api/product/list_product";
+    private static final String GET_PRODUCTS_URL = "https://moogold.com/wp-json/v1/api/product/product_detail";
     private static final String API_PATH = "product/product_detail";
 
     public void fetchProductList(int productId) {

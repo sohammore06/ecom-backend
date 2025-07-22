@@ -20,7 +20,7 @@ public class MoogoldSyncService {
         log.info("➡️ Starting MooGold product sync for category ID 1");
 
         try {
-            moogoldTpClient.fetchProductList(5846232);
+            moogoldTpClient.fetchProductList(15145);
             log.info("✅ MooGold raw product response:\n{}");
 
         }catch (Exception e) {

@@ -24,9 +24,9 @@ public class MoogoldTpClient {
     private final ThirdPartyRepository thirdPartyRepository;
 
     private static final String GET_PRODUCTS_URL = "https://moogold.com/wp-json/v1/api/product/list_product";
-    private static final String API_PATH = "product/list_product";
+    private static final String API_PATH = "product/product_detail";
 
-    public void fetchProductList(int categoryId) {
+    public void fetchProductList(int productId) {
         try {
             // Load third-party credentials
             ThirdParty moogold = thirdPartyRepository.findByNameIgnoreCase("moogold")
@@ -41,7 +41,7 @@ public class MoogoldTpClient {
             // Prepare payload
             Map<String, Object> payloadMap = new HashMap<>();
             payloadMap.put("path", API_PATH);
-            payloadMap.put("category_id", categoryId);
+            payloadMap.put("product_id", productId);
             String payloadJson = objectMapper.writeValueAsString(payloadMap); // This must be used as-is for signing
 
             // Generate headers
@@ -56,7 +56,7 @@ public class MoogoldTpClient {
 
             HttpEntity<String> entity = new HttpEntity<>(payloadJson, headers);
 
-            log.info("➡️ Sending MooGold product list request with category {}", categoryId);
+            log.info("➡️ Sending MooGold product list request with category {}", productId);
             ResponseEntity<String> response = restTemplate.exchange(
                     GET_PRODUCTS_URL,
                     HttpMethod.POST,

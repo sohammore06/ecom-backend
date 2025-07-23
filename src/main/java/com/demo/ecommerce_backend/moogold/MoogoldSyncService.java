@@ -1,10 +1,13 @@
 package com.demo.ecommerce_backend.moogold;
+import com.demo.ecommerce_backend.category.Category;
+import com.demo.ecommerce_backend.category.CategoryRepository;
 import com.demo.ecommerce_backend.product.Product;
 import com.demo.ecommerce_backend.product.ProductRepository;
 import com.demo.ecommerce_backend.product.ProductSource;
 import com.demo.ecommerce_backend.thirdparty.ThirdParty;
 import com.demo.ecommerce_backend.thirdparty.ThirdPartyRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,10 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -22,7 +29,7 @@ public class MoogoldSyncService {
     private final ThirdPartyRepository thirdPartyRepository;
     private final ObjectMapper objectMapper;
     private final ProductRepository productRepository;
-
+    private final CategoryRepository categoryRepository;
     public void syncProducts(ThirdParty moogoldConfig) {
         log.info("➡️ Starting MooGold product sync");
 

@@ -26,7 +26,7 @@ public class MoogoldTpClient {
     private static final String GET_PRODUCTS_URL = "https://moogold.com/wp-json/v1/api/product/product_detail";
     private static final String API_PATH = "product/product_detail";
 
-    public void fetchProductList(int productId) {
+    public MoogoldProductListResponse fetchProductList(int productId) {
         try {
             // Load third-party credentials
             ThirdParty moogold = thirdPartyRepository.findByNameIgnoreCase("moogold")
@@ -57,18 +57,19 @@ public class MoogoldTpClient {
             HttpEntity<String> entity = new HttpEntity<>(payloadJson, headers);
 
             log.info("➡️ Sending MooGold product list request with category {}", productId);
-            ResponseEntity<String> response = restTemplate.exchange(
+            ResponseEntity<MoogoldProductListResponse> response = restTemplate.exchange(
                     GET_PRODUCTS_URL,
                     HttpMethod.POST,
                     entity,
-                    String.class
+                    MoogoldProductListResponse.class
             );
 
             log.info("✅ MooGold product list response: {}", response.getBody());
-            Object json = objectMapper.readValue(response.getBody(), Object.class);
-            String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+            String prettyJson = objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(response.getBody());
             System.out.println("Pretty MooGold JSON:\n" + prettyJson);
-//            return response.getBody();
+
+            return response.getBody();
 
         } catch (Exception e) {
             log.error("❌ Failed to fetch MooGold product list", e);

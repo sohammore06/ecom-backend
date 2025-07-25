@@ -3,6 +3,7 @@ import com.demo.ecommerce_backend.User.User;
 import com.demo.ecommerce_backend.User.UserReposirtory;
 import com.demo.ecommerce_backend.User.UserResponse;
 import com.demo.ecommerce_backend.auth.AuthenticationResponse;
+import com.demo.ecommerce_backend.auth.AuthenticationService;
 import com.demo.ecommerce_backend.config.JwtService;
 import com.demo.ecommerce_backend.oneApi.OneApiOtpClient;
 import com.demo.ecommerce_backend.wallet.Wallet;
@@ -27,6 +28,7 @@ public class OtpService{
     private final UserReposirtory userRepository;
     private final WalletRepository walletRepository;
     private final JwtService jwtService;
+    private final AuthenticationService authenticationService;
     private static final int MAX_ATTEMPTS = 4;
     private static final long COOLDOWN_SECONDS = 300;
 
@@ -116,7 +118,8 @@ public class OtpService{
 
         String accessToken = jwtService.generateToken(user.getUsername());
         String refreshToken = jwtService.generateRefreshToken(user);
-
+        authenticationService.revokeAllUserTokens(user);
+        authenticationService.saveUserToken(user, accessToken);
         Wallet wallet = walletRepository.findByUser(user)
                 .orElseGet(() -> walletRepository.save(Wallet.builder()
                         .user(user)

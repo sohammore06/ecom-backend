@@ -21,7 +21,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**"};
+    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**","/uploads/**" };
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;

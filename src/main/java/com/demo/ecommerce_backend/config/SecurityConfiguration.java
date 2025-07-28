@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,7 +22,7 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfiguration {
-    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**","/uploads/**" };
+    private static final String[] WHITE_LIST_URL = {"/api/v1/auth/**","/uploads/**","/api/v1/products" };
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
     private final LogoutHandler logoutHandler;
@@ -33,7 +34,13 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(req ->
-                        req.requestMatchers(WHITE_LIST_URL).permitAll()
+                        req.requestMatchers("/api/v1/auth/**", "/uploads/**").permitAll()
+                                .requestMatchers(HttpMethod.GET,
+                                        "/api/v1/products/**",
+                                        "/api/v1/categories/**",
+                                        "/api/v1/products/{id}",
+                                        "/api/v1/banners/**"
+                                ).permitAll()
 //                                .requestMatchers(HttpMethod.OPTIONS, "/**")
 //                                .permitAll()
                                 .anyRequest()

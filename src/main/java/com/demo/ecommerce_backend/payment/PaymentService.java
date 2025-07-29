@@ -68,6 +68,28 @@ public class PaymentService {
             return new ApiResponse<>(false, "Unexpected error: " + e.getMessage(), null);
         }
     }
+    public ApiResponse<PaymentResponse> createWalletPayment(Integer userId, BigDecimal amount) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            Merchant merchant = merchantRepository.findByActiveTrue()
+                    .orElseThrow(() -> new ResourceNotFoundException("No active merchant configured"));
+
+            // Reuse existing method with a constructed request
+            PaymentRequest walletRequest = new PaymentRequest();
+            walletRequest.setUserId(userId);
+            walletRequest.setAmount(amount);
+            walletRequest.setPaymentType(PaymentType.WALLET);
+            walletRequest.setPaymentMode(PaymentMode.UPI); // You can generalize this if needed
+            walletRequest.setOrderId(null); // no order
+
+            return processMobalegendsPayment(user, null, walletRequest, merchant);
+
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Wallet payment failed: " + e.getMessage(), null);
+        }
+    }
     public ApiResponse<GatewayStatusResponse> checkAndProcessPaymentStatus(String transactionId) {
         Payment payment = paymentRepository.findByTransactionId(transactionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Transaction not found"));
@@ -122,7 +144,7 @@ public class PaymentService {
                 .pInfo(request.getPaymentType() + " #" + txnId)
                 .udf1("userId:" + user.getId())
                 .udf2(request.getPaymentType().name())
-                .udf3(String.valueOf(request.getOrderId()))
+                .udf3(order != null ?String.valueOf(request.getOrderId()):"")
                 .build();
         Map<String, Object> responseMap = mobalegendsGatewayClient.initiatePayment(merchant, gatewayRequest);
         System.out.println("here is your response"+responseMap);

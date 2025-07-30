@@ -13,6 +13,8 @@ import com.demo.ecommerce_backend.order.Order;
 import com.demo.ecommerce_backend.order.OrderRepository;
 import com.demo.ecommerce_backend.order.OrderStatus;
 import com.demo.ecommerce_backend.util.ApiResponse;
+import com.demo.ecommerce_backend.wallet.Wallet;
+import com.demo.ecommerce_backend.wallet.WalletRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,6 +40,8 @@ public class PaymentService {
     private final MobalegendsGatewayClient mobalegendsGatewayClient;
     private final UpiGatewayClient upiGatewayClient;
     private final ObjectMapper objectMapper;
+    private final WalletRepository walletRepository;
+
     public ApiResponse<PaymentResponse> createPayment(PaymentRequest request) {
         try {
             User user = userRepository.findById(request.getUserId())
@@ -123,6 +127,22 @@ public class PaymentService {
 //                orderRepository.save(order);
             }
             orderRepository.save(order);
+        } else if (payment.getPaymentType() == PaymentType.WALLET) {
+            // Wallet Recharge Success
+            User user = payment.getUser();
+            Wallet wallet = walletRepository.findByUser(user)
+                    .orElseGet(() -> {
+                        Wallet newWallet = Wallet.builder()
+                                .user(user)
+                                .balance(BigDecimal.ZERO)
+                                .lastUpdated(LocalDateTime.now())
+                                .build();
+                        return walletRepository.save(newWallet);
+                    });
+
+            wallet.setBalance(wallet.getBalance().add(payment.getAmount()));
+            wallet.setLastUpdated(LocalDateTime.now());
+            walletRepository.save(wallet);
         }
         return new ApiResponse<>(true, "Payment status checked", statusResponse);
     }

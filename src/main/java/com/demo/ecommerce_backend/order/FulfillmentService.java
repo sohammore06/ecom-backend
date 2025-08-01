@@ -1,5 +1,6 @@
 package com.demo.ecommerce_backend.order;
 
+import com.demo.ecommerce_backend.moogold.MoogoldTpClient;
 import com.demo.ecommerce_backend.orderItem.OrderItem;
 import com.demo.ecommerce_backend.orderItem.OrderItemRepository;
 import com.demo.ecommerce_backend.product.Product;
@@ -8,6 +9,7 @@ import com.demo.ecommerce_backend.smileone.SmileOneOrderRequest;
 import com.demo.ecommerce_backend.smileone.SmileOneOrderResponse;
 import com.demo.ecommerce_backend.smileone.SmileOneTpClient;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +29,7 @@ public class FulfillmentService {
     private final OrderItemRepository orderItemRepository;
     private final OrderRepository orderRepository;
     private final SmileOneTpClient smileOneTpClient;
+    private final MoogoldTpClient moogoldTpClient;
     private final ObjectMapper objectMapper = new ObjectMapper();
     @Transactional
     public void processOrder(Order order) {
@@ -69,9 +72,32 @@ public class FulfillmentService {
 
                     }
                     case MOOGOLD -> {
-                        allDelivered = false;
-                        item.setFulfillmentStatus("PENDING");
-                        item.setFulfillmentError("MooGold fulfillment not implemented");
+                        System.out.println("we are inside create order of moogold");
+                        String gameUserId = item.getGameUserId();
+                        String zoneId = item.getZoneId(); // optional
+                        String productId = product.getExternalProductId();
+                        String categoryId = "1"; // mapped to MooGold's "category"
+
+                        Map<String, String> data = Map.of(
+                                "category", categoryId,
+                                "product-id", productId,
+                                "quantity", String.valueOf(item.getQuantity()),
+                                "User ID", gameUserId,
+                                "Server", zoneId // Only if required
+                        );
+
+                        String partnerOrderId = "MG-" + order.getId() + "-" + item.getId(); // optional but good for tracking
+                        JsonNode moogoldResponse = moogoldTpClient.createOrder(data, partnerOrderId);
+
+                        if (moogoldResponse.has("status") && "success".equalsIgnoreCase(moogoldResponse.get("status").asText())) {
+                            item.setDelivered(true);
+                            item.setFulfillmentStatus("SUCCESS");
+                            item.setDeliveryMetadata(moogoldResponse.toString());
+                        } else {
+                            allDelivered = false;
+                            item.setFulfillmentStatus("FAILED");
+                            item.setFulfillmentError("MooGold API failure: " + moogoldResponse.toString());
+                        }
                     }
                     default -> {
                         allDelivered = false;

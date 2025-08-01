@@ -128,4 +128,51 @@ public class MoogoldTpClient {
         }
     }
 
+    public JsonNode createOrder(Map<String, String> data, String partnerOrderId) {
+        try {
+            Map<String, Object> payloadMap = new HashMap<>();
+            payloadMap.put("path", "order/create_order");
+            payloadMap.put("data", data);
+            if (partnerOrderId != null) {
+                payloadMap.put("partnerOrderId", partnerOrderId);
+            }
+
+            String payloadJson = objectMapper.writeValueAsString(payloadMap);
+
+            // Auth
+            ThirdParty moogold = thirdPartyRepository.findByNameIgnoreCase("moogold")
+                    .orElseThrow(() -> new RuntimeException("MooGold config not found"));
+            Map<String, Object> metadata = objectMapper.readValue(moogold.getMetadata(), new TypeReference<>() {});
+            String partnerId = (String) metadata.get("partnerId");
+            String secretKey = (String) metadata.get("secretKey");
+
+            long timestamp = MoogoldUtil.getCurrentTimestamp();
+            String basicAuth = MoogoldUtil.generateBasicAuth(partnerId, secretKey);
+            String authSignature = MoogoldUtil.generateAuthSignature(payloadJson, timestamp, "order/create_order", secretKey);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Basic " + basicAuth);
+            headers.set("timestamp", String.valueOf(timestamp));
+            headers.set("auth", authSignature);
+
+            HttpEntity<String> entity = new HttpEntity<>(payloadJson, headers);
+
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                    "https://moogold.com/wp-json/v1/api/order/create_order",
+                    HttpMethod.POST,
+                    entity,
+                    JsonNode.class
+            );
+
+            log.info("✅ MooGold order creation response: {}", response.getBody());
+            return response.getBody();
+
+        } catch (Exception e) {
+            log.error("❌ Failed to create MooGold order", e);
+            throw new RuntimeException("MooGold order creation failed", e);
+        }
+    }
+
+
 }

@@ -110,6 +110,8 @@ public class MoogoldTpClient {
                     entity,
                     JsonNode.class
             );
+            log.info("🌐 Raw server list response for product_id {} => {}", productId, rawResponse.getBody());
+            System.out.println("🌐 Raw server list response for product_id " + productId + " => " + rawResponse.getBody());
 
             JsonNode body = response.getBody();
             Map<String, String> serverMap = new HashMap<>();

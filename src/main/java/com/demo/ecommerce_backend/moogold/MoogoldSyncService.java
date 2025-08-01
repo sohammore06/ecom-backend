@@ -41,7 +41,7 @@ public class MoogoldSyncService {
             if (externalCategoryId == null) continue;
             try {
                 int moogoldCategoryId = Integer.parseInt(externalCategoryId);
-                log.info("✅ starting Synced products for category",moogoldCategoryId );
+                log.info("✅ starting Synced products for category id",moogoldCategoryId );
                 MoogoldProductListResponse response = moogoldTpClient.fetchProductList(moogoldCategoryId);
                 if (response == null || response.getVariations() == null) {
                     log.warn("❌ Empty response for productId: {}", moogoldCategoryId);

@@ -23,10 +23,10 @@ public class MoogoldTpClient {
     private final ObjectMapper objectMapper;
     private final ThirdPartyRepository thirdPartyRepository;
 
-    private static final String GET_PRODUCTS_URL = "https://moogold.com/wp-json/v1/api/product/list_product";
-    private static final String API_PATH = "product/list_product";
+    private static final String GET_PRODUCTS_URL = "https://moogold.com/wp-json/v1/api/product/product_detail";
+    private static final String API_PATH = "product/product_detail";
 
-    public void fetchProductList(int categoryId) {
+    public MoogoldProductListResponse fetchProductList(int productId) {
         try {
             // Load third-party credentials
             ThirdParty moogold = thirdPartyRepository.findByNameIgnoreCase("moogold")
@@ -41,7 +41,7 @@ public class MoogoldTpClient {
             // Prepare payload
             Map<String, Object> payloadMap = new HashMap<>();
             payloadMap.put("path", API_PATH);
-            payloadMap.put("category_id", categoryId);
+            payloadMap.put("product_id", productId);
             String payloadJson = objectMapper.writeValueAsString(payloadMap); // This must be used as-is for signing
 
             // Generate headers
@@ -56,19 +56,20 @@ public class MoogoldTpClient {
 
             HttpEntity<String> entity = new HttpEntity<>(payloadJson, headers);
 
-            log.info("➡️ Sending MooGold product list request with category {}", categoryId);
-            ResponseEntity<String> response = restTemplate.exchange(
+            log.info("➡️ Sending MooGold product list request with category {}", productId);
+            ResponseEntity<MoogoldProductListResponse> response = restTemplate.exchange(
                     GET_PRODUCTS_URL,
                     HttpMethod.POST,
                     entity,
-                    String.class
+                    MoogoldProductListResponse.class
             );
 
             log.info("✅ MooGold product list response: {}", response.getBody());
-            Object json = objectMapper.readValue(response.getBody(), Object.class);
-            String prettyJson = objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
+            String prettyJson = objectMapper.writerWithDefaultPrettyPrinter()
+                    .writeValueAsString(response.getBody());
             System.out.println("Pretty MooGold JSON:\n" + prettyJson);
-//            return response.getBody();
+
+            return response.getBody();
 
         } catch (Exception e) {
             log.error("❌ Failed to fetch MooGold product list", e);

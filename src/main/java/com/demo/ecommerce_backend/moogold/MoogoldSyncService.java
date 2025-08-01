@@ -90,6 +90,7 @@ public class MoogoldSyncService {
                         productRepository.save(product);
                     }
                 }
+                Map<String, String> serverList = moogoldTpClient.fetchServerList(moogoldCategoryId);
                 log.info("✅ Synced {} products for category '{}'", response.getVariations().size(), category.getName());
             }catch (NumberFormatException e) {
                 log.error("❌ Invalid externalCategoryId '{}' for category '{}'", externalCategoryId, category.getName());

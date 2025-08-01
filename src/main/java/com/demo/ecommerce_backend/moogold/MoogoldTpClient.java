@@ -4,6 +4,7 @@ import com.demo.ecommerce_backend.thirdparty.ThirdParty;
 import com.demo.ecommerce_backend.thirdparty.ThirdPartyRepository;
 import com.demo.ecommerce_backend.util.MoogoldUtil;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

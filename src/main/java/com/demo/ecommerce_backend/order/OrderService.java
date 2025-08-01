@@ -35,6 +35,7 @@ public class OrderService {
     private final WalletRepository walletRepository;
     private final PaymentRepository paymentRepository;
     private final PaymentService paymentService;
+    private final FulfillmentService fulfillmentService;
 
     public ApiResponse<OrderResponse> getOrderById(Integer orderId) {
         Order order = orderRepository.findById(orderId)
@@ -229,6 +230,9 @@ public class OrderService {
         // Fulfill order immediately
         order.setStatus(OrderStatus.PAID);
 //        order.setFulfilled(true); //need to call smile one & moogold to fulfil
+        if (!order.isFulfilled()) {
+            fulfillmentService.processOrder(order);
+        }
         orderRepository.save(order);
 
         OrderResponse response = buildOrderResponse(order, items, null);

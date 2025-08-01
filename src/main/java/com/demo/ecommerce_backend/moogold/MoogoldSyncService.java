@@ -1,6 +1,7 @@
 package com.demo.ecommerce_backend.moogold;
 import com.demo.ecommerce_backend.category.Category;
 import com.demo.ecommerce_backend.category.CategoryRepository;
+import com.demo.ecommerce_backend.category.CategoryType;
 import com.demo.ecommerce_backend.product.Product;
 import com.demo.ecommerce_backend.product.ProductRepository;
 import com.demo.ecommerce_backend.product.ProductSource;
@@ -33,17 +34,17 @@ public class MoogoldSyncService {
     public void syncProducts(ThirdParty moogoldConfig) {
         log.info("➡️ Starting MooGold product sync");
 
-        Map<String, Object> metadata = parseMetadata(moogoldConfig.getMetadata());
-        List<Integer> productIds = (List<Integer>) metadata.get("products");
+        List<Category> gameCategories = categoryRepository.findByTypeAndExternalCategoryIdIsNotNull(CategoryType.GAME);
 
-        Category category = categoryRepository.findByNameIgnoreCase("mobilelegends")
-                .orElseThrow(() -> new RuntimeException("Category 'mobilelegends' not found"));
-
-        for (Integer productId : productIds) {
+        for (Category category : gameCategories) {
+            String externalCategoryId = category.getExternalCategoryId();
+            if (externalCategoryId == null) continue;
             try {
-                MoogoldProductListResponse response = moogoldTpClient.fetchProductList(productId);
+                int moogoldCategoryId = Integer.parseInt(externalCategoryId);
+                log.info("✅ starting Synced products for category",moogoldCategoryId );
+                MoogoldProductListResponse response = moogoldTpClient.fetchProductList(moogoldCategoryId);
                 if (response == null || response.getVariations() == null) {
-                    log.warn("❌ Empty response for productId: {}", productId);
+                    log.warn("❌ Empty response for productId: {}", moogoldCategoryId);
                     continue;
                 }
 
@@ -76,7 +77,7 @@ public class MoogoldSyncService {
                                 .discountedPrice(price)
                                 .source(ProductSource.MOOGOLD)
                                 .externalProductId(variation.getId().toString())
-                                .externalCategoryId(String.valueOf(productId))
+                                .externalCategoryId(String.valueOf(moogoldCategoryId))
                                 .instantDelivery(true)
                                 .requiresUserGameId(true)
                                 .requiresServerId(true)
@@ -89,8 +90,13 @@ public class MoogoldSyncService {
                         productRepository.save(product);
                     }
                 }
-            } catch (Exception e) {
-                log.error("❌ Failed to sync MooGold product for id: {}", productId, e);
+                log.info("✅ Synced {} products for category '{}'", response.getVariations().size(), category.getName());
+            }catch (NumberFormatException e) {
+                log.error("❌ Invalid externalCategoryId '{}' for category '{}'", externalCategoryId, category.getName());
+                continue;
+            }
+            catch (Exception e) {
+                log.error("❌ Failed to sync MooGold product for id: {}", category.getExternalCategoryId(), e);
             }
         }
     }

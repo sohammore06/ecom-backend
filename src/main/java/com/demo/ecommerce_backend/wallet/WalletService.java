@@ -2,6 +2,7 @@ package com.demo.ecommerce_backend.wallet;
 
 import com.demo.ecommerce_backend.User.User;
 import com.demo.ecommerce_backend.User.UserReposirtory;
+import com.demo.ecommerce_backend.payment.*;
 import com.demo.ecommerce_backend.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,7 +16,7 @@ public class WalletService {
 
     private final WalletRepository walletRepository;
     private final UserReposirtory userRepository;
-
+    private final PaymentService paymentService;
     public ApiResponse<WalletResponse> getWallet(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
@@ -26,18 +27,22 @@ public class WalletService {
         return new ApiResponse<>(true, "Wallet fetched successfully", toResponse(wallet));
     }
 
-    public ApiResponse<WalletResponse> addAmount(Integer userId, WalletRequest request) {
+    public ApiResponse<PaymentResponse> addAmount(Integer userId, WalletRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Wallet wallet = walletRepository.findByUser(user)
                 .orElseGet(() -> createWalletForUser(user));
 
-        wallet.setBalance(wallet.getBalance().add(request.getAmount()));
-        wallet.setLastUpdated(LocalDateTime.now());
-        walletRepository.save(wallet);
+        // 2. Use paymentService to initiate the payment
+        ApiResponse<PaymentResponse> paymentResponse = paymentService.createWalletPayment(userId,request.getAmount());
 
-        return new ApiResponse<>(true, "Amount added to wallet", toResponse(wallet));
+        // 3. Return UPI payment URL
+        if (paymentResponse.getData() != null) {
+            return new ApiResponse<>(true, "Wallet recharge initiated", paymentResponse.getData());
+        } else {
+            return new ApiResponse<>(false, "Failed to initiate wallet recharge: " + paymentResponse.getMessage(), null);
+        }
     }
 
     private Wallet createWalletForUser(User user) {

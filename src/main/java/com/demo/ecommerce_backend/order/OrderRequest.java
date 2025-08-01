@@ -11,4 +11,5 @@ public class OrderRequest {
     private List<OrderItemRequest> items;
     private PaymentMode paymentMode; // WALLET, UPI, etc.
     private boolean useWallet;
+    private Integer couponProductId; // optional
 }

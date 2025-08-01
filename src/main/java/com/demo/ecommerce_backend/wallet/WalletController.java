@@ -1,5 +1,6 @@
 package com.demo.ecommerce_backend.wallet;
 
+import com.demo.ecommerce_backend.payment.PaymentResponse;
 import com.demo.ecommerce_backend.util.ApiResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ public class WalletController {
     }
 
     @PostMapping("/{userId}/add")
-    public ResponseEntity<ApiResponse<WalletResponse>> addAmount(@PathVariable Integer userId,
-                                                                 @RequestBody WalletRequest request) {
+    public ResponseEntity<ApiResponse<PaymentResponse>> addAmount(@PathVariable Integer userId,
+                                                                  @RequestBody WalletRequest request) {
         return ResponseEntity.ok(walletService.addAmount(userId, request));
     }
 }

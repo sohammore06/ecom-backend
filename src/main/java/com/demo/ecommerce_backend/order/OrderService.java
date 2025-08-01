@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import com.demo.ecommerce_backend.orderItem.OrderItemRepository;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -125,6 +126,22 @@ public class OrderService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
+        Product couponProduct = null;
+        BigDecimal discountAmount = BigDecimal.ZERO;
+
+        if (request.getCouponProductId() != null) {
+            couponProduct = productRepository.findById(request.getCouponProductId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Coupon product not found"));
+
+            Map<String, String> metadata = couponProduct.getMetadata();
+            String discountStr = metadata.get("discount_amount");
+            if (discountStr == null) {
+                throw new IllegalArgumentException("Discount amount not found in coupon metadata");
+            }
+
+            discountAmount = new BigDecimal(discountStr);
+        }
+
         List<OrderItem> items = request.getItems().stream().map(itemReq -> {
             Product product = productRepository.findById(itemReq.getProductId())
                     .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
@@ -142,13 +159,19 @@ public class OrderService {
                 .map(i -> i.getPriceAtPurchase().multiply(BigDecimal.valueOf(i.getQuantity())))
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        BigDecimal finalAmount = total.subtract(discountAmount);
+        if (finalAmount.compareTo(BigDecimal.ZERO) < 0) {
+            finalAmount = BigDecimal.ZERO;
+        }
         Order order = Order.builder()
                 .user(user)
                 .totalAmount(total)
-                .paidAmount(total)
+                .paidAmount(finalAmount)
                 .status(OrderStatus.PENDING)
                 .paymentMode(request.getPaymentMode())
                 .usedWallet(request.isUseWallet())
+                .coupon(couponProduct)
+                .discountAmount(discountAmount)
                 .build();
         order = orderRepository.save(order);
 
@@ -158,9 +181,9 @@ public class OrderService {
         ApiResponse<OrderResponse> response;
 
         if (request.getPaymentMode() == PaymentMode.WALLET) {
-            response = handleWalletPayment(user, order, total, items);
+            response = handleWalletPayment(user, order, finalAmount, items);
         } else {
-            response = handleOnlinePayment(user, order, total, items, request);
+            response = handleOnlinePayment(user, order, finalAmount, items, request);
         }
 
         return response;

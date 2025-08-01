@@ -32,6 +32,12 @@ public class Category {
 
     @Column(length = 1000)
     private String imageUrl;
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private CategoryType type;
+    @Column(name = "external_category_id")
+    private String externalCategoryId;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private LocalDateTime updatedAt = LocalDateTime.now();

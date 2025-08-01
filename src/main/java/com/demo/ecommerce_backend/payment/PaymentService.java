@@ -13,6 +13,8 @@ import com.demo.ecommerce_backend.order.Order;
 import com.demo.ecommerce_backend.order.OrderRepository;
 import com.demo.ecommerce_backend.order.OrderStatus;
 import com.demo.ecommerce_backend.util.ApiResponse;
+import com.demo.ecommerce_backend.wallet.Wallet;
+import com.demo.ecommerce_backend.wallet.WalletRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -38,6 +40,8 @@ public class PaymentService {
     private final MobalegendsGatewayClient mobalegendsGatewayClient;
     private final UpiGatewayClient upiGatewayClient;
     private final ObjectMapper objectMapper;
+    private final WalletRepository walletRepository;
+
     public ApiResponse<PaymentResponse> createPayment(PaymentRequest request) {
         try {
             User user = userRepository.findById(request.getUserId())
@@ -66,6 +70,28 @@ public class PaymentService {
         } catch (Exception e) {
             // Unexpected issues (e.g., HTTP failure, conversion error)
             return new ApiResponse<>(false, "Unexpected error: " + e.getMessage(), null);
+        }
+    }
+    public ApiResponse<PaymentResponse> createWalletPayment(Integer userId, BigDecimal amount) {
+        try {
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+            Merchant merchant = merchantRepository.findByActiveTrue()
+                    .orElseThrow(() -> new ResourceNotFoundException("No active merchant configured"));
+
+            // Reuse existing method with a constructed request
+            PaymentRequest walletRequest = new PaymentRequest();
+            walletRequest.setUserId(userId);
+            walletRequest.setAmount(amount);
+            walletRequest.setPaymentType(PaymentType.WALLET);
+            walletRequest.setPaymentMode(PaymentMode.UPI); // You can generalize this if needed
+            walletRequest.setOrderId(null); // no order
+
+            return processMobalegendsPayment(user, null, walletRequest, merchant);
+
+        } catch (Exception e) {
+            return new ApiResponse<>(false, "Wallet payment failed: " + e.getMessage(), null);
         }
     }
     public ApiResponse<GatewayStatusResponse> checkAndProcessPaymentStatus(String transactionId) {
@@ -101,6 +127,22 @@ public class PaymentService {
 //                orderRepository.save(order);
             }
             orderRepository.save(order);
+        } else if (payment.getPaymentType() == PaymentType.WALLET) {
+            // Wallet Recharge Success
+            User user = payment.getUser();
+            Wallet wallet = walletRepository.findByUser(user)
+                    .orElseGet(() -> {
+                        Wallet newWallet = Wallet.builder()
+                                .user(user)
+                                .balance(BigDecimal.ZERO)
+                                .lastUpdated(LocalDateTime.now())
+                                .build();
+                        return walletRepository.save(newWallet);
+                    });
+
+            wallet.setBalance(wallet.getBalance().add(payment.getAmount()));
+            wallet.setLastUpdated(LocalDateTime.now());
+            walletRepository.save(wallet);
         }
         return new ApiResponse<>(true, "Payment status checked", statusResponse);
     }
@@ -122,7 +164,7 @@ public class PaymentService {
                 .pInfo(request.getPaymentType() + " #" + txnId)
                 .udf1("userId:" + user.getId())
                 .udf2(request.getPaymentType().name())
-                .udf3(String.valueOf(request.getOrderId()))
+                .udf3(order != null ?String.valueOf(request.getOrderId()):"")
                 .build();
         Map<String, Object> responseMap = mobalegendsGatewayClient.initiatePayment(merchant, gatewayRequest);
         System.out.println("here is your response"+responseMap);

@@ -2,6 +2,7 @@ package com.demo.ecommerce_backend.order;
 
 import com.demo.ecommerce_backend.User.User;
 import com.demo.ecommerce_backend.payment.PaymentMode;
+import com.demo.ecommerce_backend.product.Product;
 import com.demo.ecommerce_backend.util.JsonMapConverter;
 import jakarta.persistence.*;
 import lombok.*;
@@ -44,6 +45,12 @@ public class Order {
     private String paymentReference;
 
     private boolean usedWallet;
+    @ManyToOne
+    @JoinColumn(name = "coupon_id")
+    private Product coupon;
+
+    @Column
+    private BigDecimal discountAmount;
 
     private LocalDateTime createdAt = LocalDateTime.now();
 

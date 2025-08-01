@@ -131,4 +131,51 @@ public class SmileOneTpClient {
             throw new RuntimeException("Failed to create SmileOne order", e);
         }
     }
+//    public SmileOneValidationResponse validateAccount(String userId, String zoneId, String productId) {
+//        try {
+//            ThirdParty config = thirdPartyRepository.findByNameIgnoreCase("smileone")
+//                    .orElseThrow(() -> new RuntimeException("SmileOne third-party config not found"));
+//
+//            Map<String, Object> metadata = objectMapper.readValue(
+//                    config.getMetadata(), new TypeReference<>() {}
+//            );
+//
+//            String uid = (String) metadata.get("uid");
+//            String email = (String) metadata.get("email");
+//            String key = (String) metadata.get("key");
+//            long timestamp = Instant.now().getEpochSecond();
+//
+//            Map<String, String> params = new HashMap<>();
+//            params.put("uid", uid);
+//            params.put("email", email);
+//            params.put("userid", userId);
+//            params.put("zoneid", zoneId);
+//            params.put("product", "mobilelegends");
+//            params.put("productid", productId);
+//            params.put("time", String.valueOf(timestamp));
+//
+//            String sign = SmileOneUtil.generateSignature(params, key);
+//
+//            MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
+//            params.forEach(body::add);
+//            body.add("sign", sign);
+//
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//            HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(body, headers);
+//
+//            String url = "https://www.smile.one/smilecoin/api/getrole";
+//            ResponseEntity<SmileOneValidationResponse> response = restTemplate.postForEntity(
+//                    url, entity, SmileOneValidationResponse.class
+//            );
+//
+//            log.info("SmileOne validateAccount response: {}", response.getBody());
+//            return response.getBody();
+//
+//        } catch (Exception e) {
+//            log.error("Failed to validate SmileOne user account", e);
+//            throw new RuntimeException("SmileOne validation failed", e);
+//        }
+//    }
+
 }

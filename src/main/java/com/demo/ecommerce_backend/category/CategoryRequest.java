@@ -16,4 +16,6 @@ public class CategoryRequest {
     private Integer parentId; // null if it's a top-level category
     private boolean isActive = true;
     private MultipartFile imageFile;
+    private CategoryType type; // ➕ added this
+    private String externalCategoryId; // ➕
 }

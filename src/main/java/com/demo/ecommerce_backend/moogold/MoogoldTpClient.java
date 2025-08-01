@@ -76,4 +76,53 @@ public class MoogoldTpClient {
             throw new RuntimeException("Failed to fetch MooGold product list", e);
         }
     }
+    public Map<String, String> fetchServerList(int productId) {
+        try {
+            Map<String, Object> payloadMap = new HashMap<>();
+            payloadMap.put("path", "product/server_list");
+            payloadMap.put("product_id", productId);
+
+            String payloadJson = objectMapper.writeValueAsString(payloadMap);
+
+            // Auth setup (same as before)
+            ThirdParty moogold = thirdPartyRepository.findByNameIgnoreCase("moogold")
+                    .orElseThrow(() -> new RuntimeException("MooGold third-party config not found"));
+            Map<String, Object> metadata = objectMapper.readValue(moogold.getMetadata(), new TypeReference<>() {});
+            String partnerId = (String) metadata.get("partnerId");
+            String secretKey = (String) metadata.get("secretKey");
+
+            long timestamp = MoogoldUtil.getCurrentTimestamp();
+            String basicAuth = MoogoldUtil.generateBasicAuth(partnerId, secretKey);
+            String authSignature = MoogoldUtil.generateAuthSignature(payloadJson, timestamp, "product/server_list", secretKey);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Basic " + basicAuth);
+            headers.set("timestamp", String.valueOf(timestamp));
+            headers.set("auth", authSignature);
+
+            HttpEntity<String> entity = new HttpEntity<>(payloadJson, headers);
+
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                    "https://moogold.com/wp-json/v1/api/product/server_list",
+                    HttpMethod.POST,
+                    entity,
+                    JsonNode.class
+            );
+
+            JsonNode body = response.getBody();
+            Map<String, String> serverMap = new HashMap<>();
+            if (body != null) {
+                body.fields().forEachRemaining(entry -> serverMap.put(entry.getKey(), entry.getValue().asText()));
+            }
+            log.info("📦 MooGold server list for product_id {} => {}", productId, serverMap);
+            System.out.println("📦 Server list for product_id " + productId + " => " + serverMap);
+            return serverMap;
+
+        } catch (Exception e) {
+            log.error("❌ Failed to fetch MooGold server list", e);
+            return new HashMap<>();
+        }
+    }
+
 }

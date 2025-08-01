@@ -21,7 +21,8 @@ public class CategoryService {
     public CategoryResponse createCategory(CategoryRequest request) {
         Category category = new Category();
         category.setName(request.getName());
-
+        category.setType(request.getType()); // ➕ added
+        category.setExternalCategoryId(request.getExternalCategoryId()); // ➕ added
         if (request.getParentId() != null) {
             Category parent = categoryRepository.findById(request.getParentId())
                     .orElseThrow(() -> new ResourceNotFoundException("Parent category not found"));
@@ -55,7 +56,8 @@ public class CategoryService {
         Category category = getCategoryEntityById(id);
 
         category.setName(request.getName());
-
+        category.setType(request.getType()); // ➕ added
+        category.setExternalCategoryId(request.getExternalCategoryId()); // ➕ added
         if (request.getParentId() != null) {
             if (id.equals(request.getParentId())) {
                 throw new IllegalArgumentException("Category cannot be its own parent");
@@ -99,6 +101,8 @@ public class CategoryService {
                 .createdAt(category.getCreatedAt())
                 .updatedAt(category.getUpdatedAt())
                 .imageUrl(category.getImageUrl()) // ➕ include in CategoryResponse if not already
+                .type(category.getType()) // ➕
+                .externalCategoryId(category.getExternalCategoryId()) // ➕
                 .build();
     }
 }

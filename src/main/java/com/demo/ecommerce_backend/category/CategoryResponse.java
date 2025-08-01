@@ -19,4 +19,6 @@ public class CategoryResponse {
     private Integer parentId;
     private String imageUrl;
     private List<CategoryResponse> subcategories;
+    private CategoryType type; // ➕ added
+    private String externalCategoryId; // ➕ added
 }

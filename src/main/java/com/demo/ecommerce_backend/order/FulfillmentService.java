@@ -93,11 +93,17 @@ public class FulfillmentService {
                             item.setDelivered(true);
                             item.setFulfillmentStatus("SUCCESS");
                             item.setDeliveryMetadata(moogoldResponse.toString());
-                        } else {
+                        }
+                        else if(moogoldResponse.has("status") && "processing".equalsIgnoreCase(moogoldResponse.get("status").asText())){
+                            item.setDelivered(true);
+                            item.setFulfillmentStatus("PROCESSING");
+                            item.setDeliveryMetadata(moogoldResponse.toString());
+                        }else {
                             allDelivered = false;
                             item.setFulfillmentStatus("FAILED");
                             item.setFulfillmentError("MooGold API failure: " + moogoldResponse.toString());
                         }
+                        item.setExternalOrderId(partnerOrderId);
                     }
                     default -> {
                         allDelivered = false;

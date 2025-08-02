@@ -66,4 +66,10 @@ public class ProductController {
         thirdPartySyncService.runSync();
         return new ApiResponse<>(true, "Product sync started manually.");
     }
+    @PostMapping("/validate")
+    public ResponseEntity<ApiResponse<Object>> validateProduct(@RequestBody ProductValidationRequest request) {
+        Object validationResult = productService.validateProduct(request);
+        return ResponseEntity.ok(new ApiResponse<>(true, "Product validated successfully", validationResult));
+    }
+
 }

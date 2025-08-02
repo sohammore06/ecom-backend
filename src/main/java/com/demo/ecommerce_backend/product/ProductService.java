@@ -3,6 +3,8 @@ package com.demo.ecommerce_backend.product;
 import com.demo.ecommerce_backend.category.Category;
 import com.demo.ecommerce_backend.category.CategoryRepository;
 import com.demo.ecommerce_backend.exception.ResourceNotFoundException;
+import com.demo.ecommerce_backend.moogold.MoogoldTpClient;
+import com.demo.ecommerce_backend.smileone.SmileOneTpClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,7 +19,8 @@ public class ProductService {
 
     private final ProductRepository productRepository;
     private final CategoryRepository categoryRepository;
-
+    private final SmileOneTpClient smileOneTpClient;
+    private final MoogoldTpClient moogoldTpClient;
     public ProductResponse createProduct(ProductRequest request) {
         if (productRepository.existsByCode(request.getCode())) {
             throw new IllegalArgumentException("Product code already exists.");
@@ -132,5 +135,28 @@ public class ProductService {
                 .createdAt(product.getCreatedAt())
                 .updatedAt(product.getUpdatedAt())
                 .build();
+    }
+    public Object validateProduct(ProductValidationRequest request) {
+        Product product = productRepository.findById(request.getProductId())
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found"));
+
+        switch (product.getSource()) {
+            case SMILEONE -> {
+                return smileOneTpClient.validateAccount(
+                        request.getUserId(),
+                        request.getZoneId(),
+                        product.getExternalProductId()
+                );
+            }
+            case MOOGOLD -> {
+
+                return moogoldTpClient.validateProduct(
+                        product.getExternalProductId(),
+                        request.getUserId(),
+                        "Asia"
+                );
+            }
+            default -> throw new UnsupportedOperationException("Validation not supported for this product source");
+        }
     }
 }

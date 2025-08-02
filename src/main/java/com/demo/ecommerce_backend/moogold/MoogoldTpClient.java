@@ -174,5 +174,52 @@ public class MoogoldTpClient {
         }
     }
 
+    public JsonNode validateProduct(String productId, String userId, String server) {
+        try {
+            Map<String, Object> data = new HashMap<>();
+            data.put("product-id", productId);
+            data.put("User ID", userId);
+            data.put("Server", server);
+
+            Map<String, Object> payloadMap = new HashMap<>();
+            payloadMap.put("path", "product/validate");
+            payloadMap.put("data", data);
+
+            String payloadJson = objectMapper.writeValueAsString(payloadMap);
+
+            ThirdParty moogold = thirdPartyRepository.findByNameIgnoreCase("moogold")
+                    .orElseThrow(() -> new RuntimeException("MooGold config not found"));
+
+            Map<String, Object> metadata = objectMapper.readValue(moogold.getMetadata(), new TypeReference<>() {});
+            String partnerId = (String) metadata.get("partnerId");
+            String secretKey = (String) metadata.get("secretKey");
+
+            long timestamp = MoogoldUtil.getCurrentTimestamp();
+            String basicAuth = MoogoldUtil.generateBasicAuth(partnerId, secretKey);
+            String authSignature = MoogoldUtil.generateAuthSignature(payloadJson, timestamp, "product/validate", secretKey);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Basic " + basicAuth);
+            headers.set("timestamp", String.valueOf(timestamp));
+            headers.set("auth", authSignature);
+
+            HttpEntity<String> entity = new HttpEntity<>(payloadJson, headers);
+
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                    "https://moogold.com/wp-json/v1/api/product/validate",
+                    HttpMethod.POST,
+                    entity,
+                    JsonNode.class
+            );
+
+            log.info("✅ MooGold product validation response: {}", response.getBody());
+            return response.getBody();
+
+        } catch (Exception e) {
+            log.error("❌ Failed to validate MooGold product", e);
+            throw new RuntimeException("MooGold product validation failed", e);
+        }
+    }
 
 }

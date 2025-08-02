@@ -254,7 +254,7 @@ public class MoogoldTpClient {
                     entity,
                     JsonNode.class
             );
-
+            log.info("✅ MooGold product status response: {}", response.getBody());
             return response.getBody();
         } catch (Exception e) {
             log.error("❌ Error checking MooGold order status", e);

@@ -221,5 +221,45 @@ public class MoogoldTpClient {
             throw new RuntimeException("MooGold product validation failed", e);
         }
     }
+    // Inside MoogoldTpClient.java
+    public JsonNode checkStatusByPartnerOrderId(String partnerOrderId) {
+        try {
+            Map<String, Object> payloadMap = new HashMap<>();
+            payloadMap.put("path", "order/order_detail_partner_id");
+            payloadMap.put("partner_order_id", partnerOrderId);
+            String payloadJson = objectMapper.writeValueAsString(payloadMap);
+
+            ThirdParty moogold = thirdPartyRepository.findByNameIgnoreCase("moogold")
+                    .orElseThrow(() -> new RuntimeException("MooGold config not found"));
+
+            Map<String, Object> metadata = objectMapper.readValue(moogold.getMetadata(), new TypeReference<>() {});
+            String partnerId = (String) metadata.get("partnerId");
+            String secretKey = (String) metadata.get("secretKey");
+
+            long timestamp = MoogoldUtil.getCurrentTimestamp();
+            String basicAuth = MoogoldUtil.generateBasicAuth(partnerId, secretKey);
+            String authSignature = MoogoldUtil.generateAuthSignature(payloadJson, timestamp, "order/order_detail_partner_id", secretKey);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.set("Authorization", "Basic " + basicAuth);
+            headers.set("timestamp", String.valueOf(timestamp));
+            headers.set("auth", authSignature);
+
+            HttpEntity<String> entity = new HttpEntity<>(payloadJson, headers);
+
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                    "https://moogold.com/wp-json/v1/api/order/order_detail_partner_id",
+                    HttpMethod.POST,
+                    entity,
+                    JsonNode.class
+            );
+
+            return response.getBody();
+        } catch (Exception e) {
+            log.error("❌ Error checking MooGold order status", e);
+            throw new RuntimeException("MooGold order status check failed");
+        }
+    }
 
 }

@@ -5,10 +5,13 @@ import com.demo.ecommerce_backend.moogold.MoogoldTpClient;
 import com.demo.ecommerce_backend.product.Product;
 import com.demo.ecommerce_backend.product.ProductSource;
 import com.fasterxml.jackson.databind.JsonNode;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@Service
+@RequiredArgsConstructor
 public class OrderItemService {
     // In OrderItemService.java
     private  OrderItemRepository orderItemRepository;
